@@ -17,7 +17,7 @@ import bgStudio from "../picture/studio.jpg";
 import bgShowroom from "../picture/showroom.jpg";
 
 const Sidebar = () => {
-  const API_BASE = "https://YOUR_BACKEND_URL.vercel.app"; // Thay YOUR_BACKEND_URL bằng URL thực tế
+  const API_BASE = "https://viettin-production.up.railway.app"; // Railway backend URL
   const {
     currentStep,
     setStep,
