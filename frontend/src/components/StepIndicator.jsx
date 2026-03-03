@@ -3,11 +3,9 @@ import useDesignStore from '../store/useDesignStore';
 
 const steps = [
     { n: 1, label: 'Cấu hình' },
-    { n: 2, label: 'Background' },
-    { n: 3, label: 'Thiết kế' },
-    { n: 4, label: 'Thử đồ AI' },
-    { n: 5, label: 'Báo giá' },
-    { n: 6, label: 'Bảng size' },
+    { n: 2, label: 'Thử đồ AI' },
+    { n: 3, label: 'Báo giá' },
+    { n: 4, label: 'Bảng size' },
 ];
 
 const StepIndicator = () => {
@@ -23,7 +21,7 @@ const StepIndicator = () => {
                     <button
                         key={step.n}
                         onClick={() => setStep(step.n)}
-                        className="relative z-10 flex flex-col items-center group w-1/6 transition-all hover:scale-105"
+                        className="relative z-10 flex flex-col items-center group w-1/4 transition-all hover:scale-105"
                     >
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all
                             ${currentStep === step.n 

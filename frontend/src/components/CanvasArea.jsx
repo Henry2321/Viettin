@@ -23,14 +23,16 @@ const CanvasArea = () => {
     const modelImg = model;
     const logoImg = logo;
 
-    const [canvasSize, setCanvasSize] = useState({ width: 800, height: 1000 });
+    const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
 
     useEffect(() => {
         const updateSize = () => {
             const container = document.getElementById('canvas-container');
             if (container) {
-                const newWidth = Math.min(container.offsetWidth, 800);
-                setCanvasSize({ width: newWidth, height: newWidth * 1.25 }); 
+                const containerWidth = container.offsetWidth;
+                const maxWidth = Math.min(containerWidth * 0.9, 600); // Giới hạn max 600px
+                const height = maxWidth * 0.75; // Tỷ lệ 4:3 thay vì 5:4
+                setCanvasSize({ width: maxWidth, height });
             }
         };
         window.addEventListener('resize', updateSize);
@@ -38,30 +40,30 @@ const CanvasArea = () => {
         return () => window.removeEventListener('resize', updateSize);
     }, []);
 
-    const scale = (canvasSize.width / 800) || 1;
+    const scale = (canvasSize.width / 600) || 1;
 
     return (
         <div id="canvas-container" className="w-full flex justify-center items-center">
             <Stage width={canvasSize.width} height={canvasSize.height} ref={stageRef} className="rounded-2xl overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.5)] bg-slate-900">
                 <Layer>
                     {/* 1. LAYOUT LOGIC */}
-                    {currentStep < 5 ? (
+                    {currentStep < 3 ? (
                         <Group>
                             <Rect width={canvasSize.width} height={canvasSize.height} fill="#1e293b" />
-                            {bgImg && currentStep >= 2 && <KonvaImage image={bgImg} width={canvasSize.width} height={canvasSize.height} />}
                             
+                            {/* Hiển thị ảnh kết quả AI Try-On */}
                             {modelImg && (
                                 <KonvaImage
                                     image={modelImg}
-                                    x={(canvasSize.width - 700 * scale) / 2}
-                                    y={canvasSize.height - ((modelImg.width > 0 ? (modelImg.height/modelImg.width) : 1) * 700 * scale)}
-                                    width={700 * scale}
-                                    height={(modelImg.width > 0 ? (modelImg.height/modelImg.width) : 1) * 700 * scale}
+                                    x={(canvasSize.width - 400 * scale) / 2}
+                                    y={canvasSize.height * 0.1}
+                                    width={400 * scale}
+                                    height={(modelImg.width > 0 ? (modelImg.height/modelImg.width) : 1) * 400 * scale}
                                 />
                             )}
 
-                            {/* Áo (Chế độ thiết kế) */}
-                            {shirtImg && !isAiMerged && (
+                            {/* Hiển thị áo thiết kế khi chưa có AI */}
+                            {shirtImg && !modelImg && (
                                 <Group
                                     x={(canvasSize.width - (650 * shirtFit.scale * scale)) / 2 + shirtFit.x * scale}
                                     y={(canvasSize.height * 0.25) + shirtFit.y * scale}
@@ -76,72 +78,91 @@ const CanvasArea = () => {
                                     />
                                 </Group>
                             )}
-
-                            {/* Logo: Hiện độc lập để người dùng dễ căn chỉnh */}
-                            {logoImg && !isAiMerged && (
-                                <KonvaImage
-                                    image={logoImg}
-                                    x={(canvasSize.width * logoPos.x) - ((150 * scale * (logoSize || 15)/10) * 0.5)}
-                                    y={(canvasSize.height * logoPos.y)}
-                                    width={150 * scale * (logoSize || 15)/10}
-                                    height={(logoImg.width > 0 ? (logoImg.height / logoImg.width) : 1) * (150 * scale * (logoSize || 15)/10)}
-                                    draggable
-                                    onDragEnd={(e) => {
-                                        const node = e.target;
-                                        setLogoPos({ 
-                                            x: node.x() / canvasSize.width, 
-                                            y: node.y() / canvasSize.height 
-                                        });
-                                    }}
-                                />
-                            )}
                         </Group>
-                    ) : (
-                        // QUOTE VIEW (B5) hoặc SIZE CHART (B6)
-                        <>
-                            {currentStep === 5 && (
-                                <Group>
-                                    <Rect width={canvasSize.width} height={canvasSize.height} fill="#0a2351" />
-                                    {bgImg && <KonvaImage image={bgImg} width={canvasSize.width} height={canvasSize.height} opacity={0.6} />}
-                                    
-                                    <Group x={40 * scale} y={40 * scale}>
-                                        <Rect width={canvasSize.width - 80 * scale} height={canvasSize.height - 80 * scale} fill="white" cornerRadius={20} shadowBlur={20} shadowOpacity={0.3} />
-                                        
-                                        {/* Tên loại áo */}
-                                        <Text text={quote.title || "MẪU THIẾT KẾ ĐỒNG PHỤC"} fontSize={32} fontStyle="bold" fill="#0a2351" x={40} y={40} />
-                                        
-                                        {/* Hình ảnh thiết kế chính */}
-                                        <Rect x={40} y={100} width={canvasSize.width - 160 * scale} height={canvasSize.height * 0.4} fill="#f1f5f9" cornerRadius={10} />
-                                        {shirtImg && (
-                                            <KonvaImage 
-                                                image={shirtImg} 
-                                                x={80} y={120} 
-                                                width={canvasSize.width - 240 * scale} 
-                                                height={(shirtImg.height/shirtImg.width) * (canvasSize.width - 240 * scale)} 
-                                            />
-                                        )}
-                                        {/* Logo trên áo ở card báo giá */}
-                                        {logoImg && shirtImg && (
-                                            <KonvaImage
-                                                image={logoImg}
-                                                x={80 + ((canvasSize.width - 240 * scale) * logoPos.x) - (((canvasSize.width - 240 * scale) * logoSize/100) * 0.5)}
-                                                y={120 + ((shirtImg.height/shirtImg.width) * (canvasSize.width - 240 * scale)) * logoPos.y}
-                                                width={(canvasSize.width - 240 * scale) * logoSize/100}
-                                                height={logoImg.height/logoImg.width * ((canvasSize.width - 240 * scale) * logoSize/100)}
-                                            />
-                                        )}
-
-                                        {/* Thông tin báo giá */}
-                                        <Group x={40} y={canvasSize.height * 0.6}>
-                                            <Text text={`Chất liệu: ${config.fabricType || 'Chọn ở B6'}`} fontSize={18} fill="#475569" y={20} />
-                                            <Text text={`Số lượng: ${quote.quantity || '...'}`} fontSize={18} fill="#475569" y={50} />
-                                            <Text text={`Ghi chú: ${quote.note || '...'}`} fontSize={16} fill="#94a3b8" y={80} width={canvasSize.width - 160} />
-                                        </Group>
-                                    </Group>
+                    ) : currentStep === 3 ? (
+                        // QUOTE VIEW - Khung báo giá cho khách hàng
+                        <Group>
+                            <Rect width={canvasSize.width} height={canvasSize.height} fill="#0a2351" />
+                            
+                            {/* Header */}
+                            <Rect width={canvasSize.width} height={80 * scale} fill="#1e40af" />
+                            <Text 
+                                text={quote.title || "MẪU: ÁO POLO KỸ THUẬT"}
+                                fontSize={24 * scale}
+                                fontStyle="bold"
+                                fill="#fbbf24"
+                                x={20 * scale}
+                                y={25 * scale}
+                            />
+                            
+                            {/* Thông tin sản phẩm */}
+                            <Group x={20 * scale} y={100 * scale}>
+                                <Text 
+                                    text={`• Chất liệu: ${config.fabricType || 'Cá sấu Poly Thái'} | Màu: ${config.color === '#FFFFFF' ? 'Trắng' : config.color === '#000000' ? 'Đen' : 'Màu khác'} | Input: ${config.basePrice?.toLocaleString() || '170,000'}đ`}
+                                    fontSize={14 * scale}
+                                    fill="white"
+                                    width={canvasSize.width - 40 * scale}
+                                />
+                                <Text 
+                                    text={`• SL: ${quote.quantity || '100-300'} | Đơn giá: ${quote.contact || 'Liên hệ'}`}
+                                    fontSize={14 * scale}
+                                    fill="white"
+                                    y={25 * scale}
+                                    width={canvasSize.width - 40 * scale}
+                                />
+                            </Group>
+                            
+                            {/* Khung liên hệ */}
+                            <Group x={20 * scale} y={170 * scale}>
+                                <Rect 
+                                    width={canvasSize.width - 40 * scale} 
+                                    height={60 * scale} 
+                                    fill="#1e40af" 
+                                    cornerRadius={8}
+                                    stroke="#fbbf24"
+                                    strokeWidth={2}
+                                />
+                                <Text 
+                                    text="📞 Liên hệ: ___________________"
+                                    fontSize={16 * scale}
+                                    fill="#fbbf24"
+                                    x={15 * scale}
+                                    y={20 * scale}
+                                    fontStyle="bold"
+                                />
+                            </Group>
+                            
+                            {/* Hình ảnh sản phẩm */}
+                            {(modelImg && isAiMerged) || shirtImg ? (
+                                <Group x={20 * scale} y={260 * scale}>
+                                    <Rect 
+                                        width={canvasSize.width - 40 * scale} 
+                                        height={280 * scale} 
+                                        fill="#f1f5f9" 
+                                        cornerRadius={10}
+                                    />
+                                    {modelImg && isAiMerged ? (
+                                        <KonvaImage 
+                                            image={modelImg} 
+                                            x={10 * scale} 
+                                            y={10 * scale} 
+                                            width={(canvasSize.width - 60 * scale)} 
+                                            height={260 * scale}
+                                        />
+                                    ) : shirtImg && (
+                                        <KonvaImage 
+                                            image={shirtImg} 
+                                            x={10 * scale} 
+                                            y={10 * scale} 
+                                            width={(canvasSize.width - 60 * scale)} 
+                                            height={(shirtImg.height/shirtImg.width) * (canvasSize.width - 60 * scale)} 
+                                        />
+                                    )}
                                 </Group>
-                            )}
-
-                            {currentStep === 6 && (
+                            ) : null}
+                        </Group>
+                    ) : currentStep === 4 ? (
+                        <Group>
                                 <Group>
                                     <Rect width={canvasSize.width} height={canvasSize.height} fill="#0f172a" />
                                     
@@ -216,8 +237,8 @@ const CanvasArea = () => {
                                         y={canvasSize.height - 20}
                                     />
                                 </Group>
-                            )}
-                        </>
+                        </Group>
+                    ) : null}
                     )}
                 </Layer>
             </Stage>
