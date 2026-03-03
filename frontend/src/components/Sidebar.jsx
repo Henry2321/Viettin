@@ -17,7 +17,9 @@ import bgStudio from "../picture/studio.jpg";
 import bgShowroom from "../picture/showroom.jpg";
 
 const Sidebar = () => {
-  const API_BASE = "http://localhost:8003";
+  const API_BASE = process.env.NODE_ENV === 'production' 
+    ? "https://viettin-ai-backend.vercel.app" 
+    : "http://localhost:8003";
   const {
     currentStep,
     setStep,
@@ -167,6 +169,20 @@ const Sidebar = () => {
     setGenerating(true);
     clearTryon();
     setTryonStatus("🔍 Đang phân tích 4 ảnh bằng AI Vision...");
+    
+    try {
+      // Test backend connection first
+      const healthCheck = await axios.get(`${API_BASE}/health`, { timeout: 5000 });
+      if (!healthCheck.data.status === 'healthy') {
+        throw new Error('Backend không sẵn sàng');
+      }
+    } catch (error) {
+      setTryonStatus("❌ Không thể kết nối backend. Vui lòng kiểm tra server.");
+      alert("Lỗi kết nối: Backend server không chạy hoặc không thể truy cập. Vui lòng khởi động lại backend.");
+      setGenerating(false);
+      return;
+    }
+    
     try {
       const formData = new FormData();
       formData.append("shirt_image", shirtSampleFile);

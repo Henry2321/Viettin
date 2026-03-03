@@ -10,13 +10,18 @@ sys.stderr.reconfigure(encoding="utf-8")
 from fastapi import FastAPI, Form, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 import os
 import time
 import io
 import base64
 import requests
 from dotenv import load_dotenv
-from google import genai
+try:
+    from google import genai
+except ImportError:
+    print("Warning: google.genai not installed. Please install: pip install google-genai")
+    genai = None
 
 # =========================================
 # LOAD ENV
@@ -29,7 +34,15 @@ load_dotenv(override=True)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 HF_API_TOKEN = os.getenv("HF_API_TOKEN")
 
-gemini_client = genai.Client(api_key=GEMINI_API_KEY)
+gemini_client = None
+if genai and GEMINI_API_KEY:
+    try:
+        gemini_client = genai.Client(api_key=GEMINI_API_KEY)
+        print("[INFO] Gemini client initialized successfully")
+    except Exception as e:
+        print(f"[WARNING] Failed to initialize Gemini client: {e}")
+else:
+    print("[WARNING] Gemini API key not found or genai not installed")
 
 # =========================================
 # FASTAPI INIT
@@ -39,9 +52,16 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000", 
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000",
+        "https://viettin-ai.vercel.app",
+        "*"
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -149,7 +169,20 @@ def gemini_tryon(
 
 @app.get("/")
 def root():
-    return {"message": "Viettin.AI is running!"}
+    return {
+        "message": "Viettin.AI is running!",
+        "status": "healthy",
+        "gemini_available": gemini_client is not None,
+        "timestamp": time.time()
+    }
+
+@app.get("/health")
+def health_check():
+    return {
+        "status": "healthy",
+        "gemini_client": gemini_client is not None,
+        "api_key_configured": bool(GEMINI_API_KEY)
+    }
 
 
 @app.post("/ai-tryon")
@@ -159,6 +192,15 @@ async def ai_tryon(
     logo_image: UploadFile = File(None),
     background_image: UploadFile = File(None)
 ):
+    if not gemini_client:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "success": False,
+                "error": "Gemini AI service not available. Please check API key configuration."
+            }
+        )
+    
     try:
         shirt_bytes = await shirt_image.read()
         person_bytes = await person_image.read()
@@ -198,7 +240,10 @@ async def ai_tryon(
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return {"success": False, "error": str(e)}
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": str(e)}
+        )
 
 
 # =========================================
