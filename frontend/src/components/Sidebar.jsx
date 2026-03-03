@@ -17,9 +17,7 @@ import bgStudio from "../picture/studio.jpg";
 import bgShowroom from "../picture/showroom.jpg";
 
 const Sidebar = () => {
-  const API_BASE = process.env.NODE_ENV === 'production' 
-    ? "https://viettin-ai-backend.vercel.app" 
-    : "http://localhost:8003";
+  const API_BASE = "https://YOUR_BACKEND_URL.vercel.app"; // Thay YOUR_BACKEND_URL bằng URL thực tế
   const {
     currentStep,
     setStep,
