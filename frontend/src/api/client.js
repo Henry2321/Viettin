@@ -1,5 +1,5 @@
-// Thay bằng URL thực từ Railway khi deploy xong
-const API_BASE_URL = 'https://viettin-production.up.railway.app';
+// Chờ generate domain xong rồi cập nhật URL thực
+const API_BASE_URL = "https://viettin-production.up.railway.app";
 
 export const apiClient = {
   // Health check
@@ -11,7 +11,7 @@ export const apiClient = {
   // AI Try-on
   async aiTryon(formData) {
     const response = await fetch(`${API_BASE_URL}/ai-tryon`, {
-      method: 'POST',
+      method: "POST",
       body: formData,
     });
     return response.json();
@@ -21,5 +21,5 @@ export const apiClient = {
   async getStatus() {
     const response = await fetch(`${API_BASE_URL}/`);
     return response.json();
-  }
+  },
 };
