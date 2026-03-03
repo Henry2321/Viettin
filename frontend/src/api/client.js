@@ -1,5 +1,5 @@
-// Thay YOUR_RAILWAY_URL bằng URL thực từ Railway
-const API_BASE_URL = 'https://your-app.railway.app';
+// Chờ Railway deploy xong rồi thay URL này
+const API_BASE_URL = 'https://viettin-production-xxxx.up.railway.app';
 
 export const apiClient = {
   // Health check
