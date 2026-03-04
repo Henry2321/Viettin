@@ -85,38 +85,67 @@ const CanvasArea = () => {
                             <Rect width={canvasSize.width} height={canvasSize.height} fill="#0a2351" />
                             
                             {/* Header */}
-                            <Rect width={canvasSize.width} height={80 * scale} fill="#1e40af" />
+                            <Rect width={canvasSize.width} height={60 * scale} fill="#1e40af" />
                             <Text 
                                 text={quote.title || "MẪU: ÁO POLO KỸ THUẬT"}
-                                fontSize={24 * scale}
+                                fontSize={20 * scale}
                                 fontStyle="bold"
                                 fill="#fbbf24"
                                 x={20 * scale}
-                                y={25 * scale}
+                                y={20 * scale}
                             />
                             
-                            {/* Thông tin sản phẩm */}
-                            <Group x={20 * scale} y={100 * scale}>
+                            {/* Hình ảnh sản phẩm - ĐẶT TRÊN CÙNG */}
+                            {(modelImg && isAiMerged) || shirtImg ? (
+                                <Group x={20 * scale} y={80 * scale}>
+                                    <Rect 
+                                        width={canvasSize.width - 40 * scale} 
+                                        height={300 * scale} 
+                                        fill="#f1f5f9" 
+                                        cornerRadius={10}
+                                    />
+                                    {modelImg && isAiMerged ? (
+                                        <KonvaImage 
+                                            image={modelImg} 
+                                            x={10 * scale}
+                                            y={10 * scale}
+                                            width={canvasSize.width - 60 * scale}
+                                            height={280 * scale}
+                                        />
+                                    ) : shirtImg && (
+                                        <KonvaImage 
+                                            image={shirtImg} 
+                                            x={((canvasSize.width - 40 * scale) - Math.min(280 * scale, (shirtImg.width/shirtImg.height) * 280 * scale)) / 2}
+                                            y={10 * scale}
+                                            width={Math.min(280 * scale, (shirtImg.width/shirtImg.height) * 280 * scale)}
+                                            height={Math.min(280 * scale, (shirtImg.height/shirtImg.width) * 280 * scale)}
+                                        />
+                                    )}
+                                </Group>
+                            ) : null}
+                            
+                            {/* Thông tin sản phẩm - ĐẶT DƯỚI */}
+                            <Group x={20 * scale} y={400 * scale}>
                                 <Text 
                                     text={`• Chất liệu: ${config.fabricType || 'Cá sấu Poly Thái'} | Màu: ${config.color === '#FFFFFF' ? 'Trắng' : config.color === '#000000' ? 'Đen' : 'Màu khác'} | Input: ${config.basePrice?.toLocaleString() || '170,000'}đ`}
-                                    fontSize={14 * scale}
+                                    fontSize={12 * scale}
                                     fill="white"
                                     width={canvasSize.width - 40 * scale}
                                 />
                                 <Text 
                                     text={`• SL: ${quote.quantity || '100-300'} | Đơn giá: ${quote.contact || 'Liên hệ'}`}
-                                    fontSize={14 * scale}
+                                    fontSize={12 * scale}
                                     fill="white"
-                                    y={25 * scale}
+                                    y={20 * scale}
                                     width={canvasSize.width - 40 * scale}
                                 />
                             </Group>
                             
                             {/* Khung liên hệ */}
-                            <Group x={20 * scale} y={170 * scale}>
+                            <Group x={20 * scale} y={460 * scale}>
                                 <Rect 
                                     width={canvasSize.width - 40 * scale} 
-                                    height={60 * scale} 
+                                    height={50 * scale} 
                                     fill="#1e40af" 
                                     cornerRadius={8}
                                     stroke="#fbbf24"
@@ -124,42 +153,13 @@ const CanvasArea = () => {
                                 />
                                 <Text 
                                     text="📞 Liên hệ: ___________________"
-                                    fontSize={16 * scale}
+                                    fontSize={14 * scale}
                                     fill="#fbbf24"
                                     x={15 * scale}
-                                    y={20 * scale}
+                                    y={18 * scale}
                                     fontStyle="bold"
                                 />
                             </Group>
-                            
-                            {/* Hình ảnh sản phẩm */}
-                            {(modelImg && isAiMerged) || shirtImg ? (
-                                <Group x={20 * scale} y={260 * scale}>
-                                    <Rect 
-                                        width={canvasSize.width - 40 * scale} 
-                                        height={280 * scale} 
-                                        fill="#f1f5f9" 
-                                        cornerRadius={10}
-                                    />
-                                    {modelImg && isAiMerged ? (
-                                        <KonvaImage 
-                                            image={modelImg} 
-                                            x={10 * scale} 
-                                            y={10 * scale} 
-                                            width={(canvasSize.width - 60 * scale)} 
-                                            height={260 * scale}
-                                        />
-                                    ) : shirtImg && (
-                                        <KonvaImage 
-                                            image={shirtImg} 
-                                            x={10 * scale} 
-                                            y={10 * scale} 
-                                            width={(canvasSize.width - 60 * scale)} 
-                                            height={(shirtImg.height/shirtImg.width) * (canvasSize.width - 60 * scale)} 
-                                        />
-                                    )}
-                                </Group>
-                            ) : null}
                         </Group>
                     ) : currentStep === 4 ? (
                         <Group>
