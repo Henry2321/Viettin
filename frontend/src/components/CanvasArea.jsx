@@ -239,7 +239,6 @@ const CanvasArea = () => {
                                 </Group>
                         </Group>
                     ) : null}
-                    )}
                 </Layer>
             </Stage>
         </div>

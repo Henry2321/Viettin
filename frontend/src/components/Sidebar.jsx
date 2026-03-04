@@ -17,7 +17,7 @@ import bgStudio from "../picture/studio.jpg";
 import bgShowroom from "../picture/showroom.jpg";
 
 const Sidebar = () => {
-  const API_BASE = "https://viettin-production.up.railway.app"; // Railway backend URL
+  const API_BASE = "https://viettin-production-757f.up.railway.app"; // Railway backend URL
   const {
     currentStep,
     setStep,
