@@ -171,7 +171,7 @@ const Sidebar = () => {
     try {
       // Test backend connection first
       const healthCheck = await axios.get(`${API_BASE}/health`, { timeout: 5000 });
-      if (!healthCheck.data.status === 'healthy') {
+      if (healthCheck.data.status !== 'healthy') {
         throw new Error('Backend không sẵn sàng');
       }
     } catch (error) {
